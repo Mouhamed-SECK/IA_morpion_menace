@@ -1,5 +1,70 @@
+#include <stdio.h>
+#include <stdint.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <math.h>
 #include "game.h"
 
+typedef enum transformation{ID, ROT_90, ROT_180, ROT_270, MIROIR_VERT, MIROIR_HORIZ} transformation;
+typedef enum ball{PINK, RED, AMBER, GREEN, GOLD, BLACK, SILVER, LILAC, WHITE} ball;
+
+
+#define ROND 1
+#define CROIX 2
+
+void appliquer_transformation_base(uint8_t grille[3][3], transformation tr)
+{
+    uint8_t t;
+    switch(tr)
+    {
+        case(ID):
+            break;
+
+        case(ROT_90):
+            t = grille[0][0];
+            grille[0][0] = grille[2][0];
+            grille[2][0]=grille[2][2];
+            grille[2][2]=grille[0][2];
+            grille[0][2]=t;
+
+            t = grille[0][1];
+            grille[0][1] = grille[1][0];
+            grille[1][0]=grille[2][1];
+            grille[2][1]=grille[1][2];
+            grille[1][2]=t;
+            break;
+
+        case(ROT_180):
+            appliquer_transformation_base(grille, ROT_90);
+            appliquer_transformation_base(grille, ROT_90);
+            break;
+
+        case(ROT_270):
+            appliquer_transformation_base(grille, ROT_90);
+            appliquer_transformation_base(grille, ROT_90);
+            appliquer_transformation_base(grille, ROT_90);
+            break;
+
+        case(MIROIR_VERT):
+            t = grille[0][0];
+            grille[0][0] = grille[0][2];
+            grille[0][2] = t;
+
+            t = grille[1][0];
+            grille[1][0] = grille[1][2];
+            grille[1][2] = t;
+
+            t = grille[2][0];
+            grille[2][0] = grille[2][2];
+            grille[2][2] = t;
+            break;
+
+        case(MIROIR_HORIZ):
+            appliquer_transformation_base(grille, ROT_90);
+            appliquer_transformation_base(grille, MIROIR_VERT);
+            appliquer_transformation_base(grille, ROT_270);
+    }
+}
 // les fonctons relative à une partie en cours 
 _Bool has_empty_cases(uint8_t grille[3][3])
 {
@@ -93,5 +158,33 @@ void from_base3_to_grid(uint8_t grille[3][3],uint64_t nb)
             
         }
     }
+
+}
+
+uint64_t from_ball_to_base3(ball bille,int choix)
+{   uint64_t nb=choix;
+    for(int i=0;i<bille;i++){
+        nb=nb*10;
+    }
+    return nb;
+}
+
+ball from_base3_to_ball(uint64_t nb)
+{
+    int i;
+    while(nb%10==0){
+        nb=nb/10;
+        i++;
+    }
+    return i;
+}
+ball transform_ball(transformation tr,ball bille,int choix)
+{
+    uint64_t code=from_ball_to_base3(bille,choix);
+    uint8_t g[3][3];
+    from_base3_to_grid(g,code);
+    appliquer_transformation_base(g,tr);
+    return from_base3_to_ball(from_grid_to_base3(g));
+    
 
 }
