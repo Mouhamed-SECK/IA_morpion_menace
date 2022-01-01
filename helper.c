@@ -1,21 +1,11 @@
 // toutes les fonctions utilitaires du jeu
-#include <stdio.h>
-#include <stdint.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <math.h>
+
+#include "helper.h"
 
 #define CONTINUE 0
 #define FINISHED 1
 
 
-typedef enum transformation{ID, ROT_90, ROT_180, ROT_270, MIROIR_VERT, MIROIR_HORIZ} transformation;
-
-char print_value(uint8_t value);
-void appliquer_transformation_base(uint8_t grille[3][3], transformation t);
-void print_grille_2d(uint8_t grille[3][3], FILE *f);
-void print_grille_1d(uint8_t grille[3][3], FILE *f);
-uint8_t next_configuration(uint8_t grille[3][3]);
 
 
 char print_value(uint8_t value)
@@ -164,38 +154,4 @@ uint8_t next_configuration(uint8_t grille[3][3])
 }
 
 
-int main() {
-    FILE *out = fopen("sortie1.txt", "w");
-    
-    uint8_t g[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
-    uint64_t i=0,temp,tab[304];
 
-    print_all_transformations_1d(g, out);
-    tab[0]=codage_entier(g);
-    
-    while(i<304)
-    {   
-        next_configuration(g);
-        temp=codage_entier (g);
-        if(is_valid_configuration(g) && !(is_in_table(codage_entier(g),tab)))
-        {
-            appliquer_transformation_base(g,ROT_90);
-            if(!(is_in_table(codage_entier(g),tab)))
-            {
-               
-                tab[i]=temp;
-                i++;
-            }
-          
-        }
-        printf("%ld\n",tab[i]);  
-    }
-    printf("ici");
-    for(i=0;i<304;i++)
-    {
-        
-        codage_grille(g,tab[i]);
-        print_all_transformations_1d(g, out);
-    }
-    
-}
