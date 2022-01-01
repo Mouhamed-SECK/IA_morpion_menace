@@ -67,28 +67,29 @@ _Bool is_in_table(uint64_t code, uint64_t tab[304])
     }
     return 0;
 }
-uint64_t codage_entier( uint8_t grille[3][3])
+uint64_t from_grid_to_base3( uint8_t grille[3][3])
 {
     
-    uint64_t nb=0,p=6561;
+    uint64_t nb=0,p=1;
     int i,j;
-    for(i=0;i<3 ;i++){
-        for(j=0;j<3;j++){
+    for(i=2;i>=0 ;i--){
+        for(j=2;j>=0;j--){
             nb=nb+grille[i][j]*p;
-            p=p/3;
+            p=p*10;
         }
     }
     return nb;
 }
-void codage_grille(uint8_t grille[3][3],uint64_t nb)
+void from_base3_to_grid(uint8_t grille[3][3],uint64_t nb)
 {
     int i,j;
+    
     for(i=2;i>=0;i--)
     {
         for(j=2;j>=0;j--)
         {
-            grille[i][j]=nb%3;
-            nb=nb/3;
+            grille[i][j]=nb%10;
+            nb=nb/10;
             
         }
     }
