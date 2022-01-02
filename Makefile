@@ -11,3 +11,4 @@ matchboxes.o	:	matchboxes.c matchboxes.h
 
 main.o	:	 main.c
 	gcc -g -Wall -Wextra -c main.c
+
