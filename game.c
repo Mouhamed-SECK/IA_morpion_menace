@@ -5,10 +5,9 @@
 #include <math.h>
 #include "game.h"
 
-typedef enum transformation{ID, ROT_90, ROT_180, ROT_270, MIROIR_VERT, MIROIR_HORIZ} transformation;
-typedef enum ball{PINK, RED, AMBER, GREEN, GOLD, BLACK, SILVER, LILAC, WHITE} ball;
 
-
+#define CONTINUE 0
+#define FINISHED 1
 #define ROND 1
 #define CROIX 2
 
@@ -68,7 +67,7 @@ void appliquer_transformation_base(uint8_t grille[3][3], transformation tr)
 // les fonctons relative à une partie en cours 
 _Bool has_empty_cases(uint8_t grille[3][3])
 {
-    uint64_t i,j;
+    uint32_t i,j;
 
      for(i=0; i<3; i++)
     {
@@ -83,7 +82,7 @@ _Bool has_empty_cases(uint8_t grille[3][3])
 
 _Bool is_win(uint8_t grille[3][3])
 {
-    uint8_t i;
+    uint32_t i;
 
     for(i=0; i<3; i++)
     {
@@ -161,24 +160,24 @@ void from_base3_to_grid(uint8_t grille[3][3],uint64_t nb)
 
 }
 
-uint64_t from_ball_to_base3(ball bille,int choix)
+uint64_t from_ball_to_base3(_balls bille,int choix)
 {   uint64_t nb=choix;
-    for(int i=0;i<bille;i++){
+    for(uint32_t i=0;i<bille;i++){
         nb=nb*10;
     }
     return nb;
 }
 
-ball from_base3_to_ball(uint64_t nb)
+_balls from_base3_to_ball(uint64_t nb)
 {
-    int i;
+    uint32_t i;
     while(nb%10==0){
         nb=nb/10;
         i++;
     }
     return i;
 }
-ball transform_ball(transformation tr,ball bille,int choix)
+_balls transform_balls(transformation tr,_balls bille,int choix)
 {
     uint64_t code=from_ball_to_base3(bille,choix);
     uint8_t g[3][3];
@@ -188,3 +187,97 @@ ball transform_ball(transformation tr,ball bille,int choix)
     
 
 }
+
+
+char print_value(uint8_t value)
+{
+    switch(value)
+    {
+        case (0):
+            return ' ';
+        case (1):
+            return 'x';
+        case (2):
+            return 'o';
+        default:
+            assert(0);
+    }
+}
+
+
+void print_grille_2d(uint8_t grille[3][3], FILE *f)
+{
+    fprintf(f, "|%c|%c|%c|\n", print_value(grille[0][0]), print_value(grille[0][1]), print_value(grille[0][2]));
+    fprintf(f, "|%c|%c|%c|\n", print_value(grille[1][0]), print_value(grille[1][1]), print_value(grille[1][2]));
+    fprintf(f, "|%c|%c|%c|\n", print_value(grille[2][0]), print_value(grille[2][1]), print_value(grille[2][2]));
+}
+
+void print_grille_1d(uint8_t grille[3][3], FILE *f)
+{
+    fprintf(f, "%c%c%c%c%c%c%c%c%c", print_value(grille[0][0]), print_value(grille[0][1]), print_value(grille[0][2]), print_value(grille[1][0]), print_value(grille[1][1]), print_value(grille[1][2]), print_value(grille[2][0]), print_value(grille[2][1]), print_value(grille[2][2]));
+}
+
+void print_all_transformations_1d(uint8_t g[3][3], FILE *f)
+{
+    print_grille_1d(g,f);
+    fprintf(f, "|");
+    /*
+
+    appliquer_transformation_base(g, ROT_90);
+    print_grille_1d(g,f);
+    fprintf(f, "|");
+
+    appliquer_transformation_base(g, ROT_90);
+    print_grille_1d(g,f);
+    fprintf(f, "|");
+
+    appliquer_transformation_base(g, ROT_90);
+    print_grille_1d(g,f);
+    fprintf(f, "|");
+
+    appliquer_transformation_base(g, ROT_90);
+    appliquer_transformation_base(g, MIROIR_VERT);
+    print_grille_1d(g,f);
+    fprintf(f, "|");
+
+    appliquer_transformation_base(g, ROT_90);
+    print_grille_1d(g,f);
+    fprintf(f, "|");
+
+    appliquer_transformation_base(g, ROT_90);
+    print_grille_1d(g,f);
+    fprintf(f, "|");
+
+    appliquer_transformation_base(g, ROT_90);
+    print_grille_1d(g,f);
+
+    //On fait une derniere transformation pour remettre la grille dans son Ã©tat initial
+    appliquer_transformation_base(g, ROT_90);
+    appliquer_transformation_base(g, MIROIR_VERT);
+    */
+    fprintf(f, "\n");
+    
+}
+
+uint8_t next_configuration(uint8_t grille[3][3])
+{
+    uint8_t i, j;
+
+    grille[0][0]++;
+    for(i=0; i<3; i++)
+    {
+        for(j=0; j<3; j++)
+        {
+            if(grille[i][j]==3)
+            {
+                grille[i][j]=0;
+                if(j<2) grille[i][j+1]++;
+                else if(i<2) grille[i+1][0]++;
+                else return FINISHED;
+            }
+        }
+    }
+
+    return CONTINUE;
+}
+
