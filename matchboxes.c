@@ -1,44 +1,10 @@
 // les fonction manupilant les botes d'allumettes 
 
 #include "matchboxes.h"
-#include "helper.h"
-#include "game.h"
 #include "assert.h"
 
-#define HASH_TABLE_SIZE 10
 
 
-typedef struct _ball
-{
-    struct _ball *next;
-    uint32_t ball_value;
-} ball;
-
-typedef  struct {
-    uint32_t size;
-    ball *head;
-} ball_list;
-
-typedef struct _tab_maillon
- {
-    ball *balls_array; //Un tableau de maillons
-    uint32_t taille_tab; //La taille du tableau de maillons
-    struct _tab_maillon *next;
-} tab_maillon;
-
- typedef struct
-{
-    uint32_t size;
-    tab_maillon *head; 
-} list_tab_maillon;
-
-
-typedef struct {  
-    ball_list *occupied;
-    ball_list *empty;
-
-    list_tab_maillon *ltm;
-} ball_arraylist;
 
 
 tab_maillon* new_tab_maillon(uint32_t size)
@@ -106,7 +72,7 @@ ball_list *new_liste()
     return r;
  }
 
-ball_list *new_liste_tab_maillons()
+list_tab_maillon *new_liste_tab_maillons()
 {
     list_tab_maillon *r = malloc(sizeof(list_tab_maillon));
     if(r==NULL)
@@ -162,7 +128,7 @@ ball* rem_tete_maillon(ball_list *l)
 }
 
 
- void add_on_head_of_arrayList(ball_arraylist* arl, uint64_t d)
+ void add_on_head_of_arrayList(ball_arraylist* arl, _balls d)
 {
     ball *l;
 
@@ -184,32 +150,6 @@ ball* rem_tete_maillon(ball_list *l)
 }
 
 
-typedef struct _matchbox  {
-
-    uint32_t match_box_id; // sum nombre pair
-    uint32_t configurations[7];  
-
-    //  tableau arrayList
-
-    ball_arraylist  *arl;
-
-    struct _matchbox *next;
-
-} matchbox;
-
-
-typedef  struct {
-    uint32_t taille;
-    matchbox *head;
-} matchboxes_list;
-
-
-typedef struct {
-
-    matchboxes_list **tab;
-    uint32_t taille;
-    
-} hash_table;
 
 
 int sum_of_odd_digits(int n) {
@@ -223,20 +163,35 @@ int sum_of_odd_digits(int n) {
 		n = n / 10;	// removing rightmost digit of n
 
 		// if r is odd, add r to sum
-		if (r % 2 == 1)
+		if (r % 2 == 0)
 			sum = sum + r;
 
 	}
 
 	return sum;
 }
+int sum_of_digits(int n) {
 
-uint32_t compute_hash_value(uint64_t configuration) {
-     return  sum_of_odd_digits(configuration) % HASH_TABLE_SIZE; 
+	int m, sum = 0;
+
+
+    while(n>0)    
+    {    
+        m=n%10;    
+        sum=sum+m;    
+        n=n/10;    
+    } 
+	return sum;
 }
 
 
-matchbox *new_matchbox(uint64_t  configuration)
+
+uint32_t compute_hash_value(uint64_t configuration, uint32_t size) {
+     return  sum_of_digits(configuration) % size; 
+}
+
+
+matchbox *new_matchbox(uint64_t  configuration, uint32_t g[3][3])
 {
     matchbox *m = malloc(sizeof(matchbox));
 
@@ -245,22 +200,46 @@ matchbox *new_matchbox(uint64_t  configuration)
         assert(0);
     }
     m->match_box_id = sum_of_odd_digits(configuration);
-    uint64_t configurations[7];
-    configurations[0] = configuration;
+
+
+
+    m->configurations[0] = configuration;
 
     uint8_t grid[3][3] =  {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
 
-    uint64_t tmp;
+    uint64_t tmp = 0;
 
     for (uint8_t i = 1; i < 7; i++)
     {
        from_base3_to_grid(grid, configuration);
        appliquer_transformation_base(grid, i);
-       from_grid_to_base3(grid);
-       configurations[i] = tmp;
+       tmp = from_grid_to_base3(grid);
+
+      m->configurations[i] = tmp;
 
     }
+
     m->arl   = new_arraylist(9);
+    _balls ball = 0;
+    for (uint32_t i = 0; i < 3; i++)
+    {
+    
+       for ( uint32_t j = 0; j < 3; j++)
+       {
+
+          if (g[i][j] !=0) {
+            uint32_t tmp = g[i][j];
+            for (uint32_t k  = 0; k < tmp; k++)
+            {
+                add_on_head_of_arrayList(m->arl, ball);
+            }
+            
+          }
+          ball++;
+       }
+       
+    }
+    
 
     m->next = NULL;
 
@@ -298,14 +277,43 @@ hash_table* new_hash_table(uint32_t size)
        matchbox_hash_table->tab[i] = new_list();
     }
 
+    return matchbox_hash_table;
+
   
 }
 
-void add_head(matchboxes_list *l , uint32_t configuration)
+void add_head(matchboxes_list *l , uint32_t configuration, uint32_t g[3][3])
 {
-    matchbox *m = new_matchbox(configuration);
+    matchbox *m = new_matchbox(configuration, g);
     m->next = l->head;
     l->head = m;
     l->taille += 1;
 }
 
+void init_matchbox_hash_table(char * matchbox, hash_table *th, uint32_t size) {
+
+
+
+    FILE *f = fopen(matchbox, "rb");
+    
+
+    if (f== NULL) {
+        fprintf(stderr, "ERREUR : fichier introuvable");
+        assert(0);
+    }
+
+    uint32_t ball_arr[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+    uint32_t configuration = 0;
+
+    
+    while (fscanf(f, "%d %d %d %d %d %d %d %d %d %d\n", &configuration, &ball_arr[0][0], &ball_arr[0][1], &ball_arr[0][2], &ball_arr[1][0], &ball_arr[1][1], &ball_arr[1][2], &ball_arr[2][0], &ball_arr[2][1] , &ball_arr[2][2]) == 10)
+    {
+     
+
+        uint32_t index = compute_hash_value(configuration, size);
+        // printf("CONFIGURATION %d \n", &configuration);
+       
+        add_head((th->tab[index]) , configuration,  ball_arr);
+
+    }
+}

@@ -19,5 +19,10 @@
     "helper.h": "c",
     "game.h": "c",
     "stdio.h": "c"
-  }
+  },
+  "C_Cpp_Runner.msvcBatchPath": "",
+  "C_Cpp_Runner.includeSearch": [
+    "*",
+    "**/*"
+  ]
 }
