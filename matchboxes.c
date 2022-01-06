@@ -3,10 +3,6 @@
 #include "matchboxes.h"
 #include "assert.h"
 
-
-
-
-
 tab_maillon* new_tab_maillon(uint32_t size)
 {
     uint32_t i;
@@ -85,7 +81,6 @@ list_tab_maillon *new_liste_tab_maillons()
     return r;
  }
 
-
 ball_arraylist* new_arraylist(uint32_t init_size)
  {
     ball_arraylist *arl;
@@ -152,37 +147,22 @@ ball* rem_tete_maillon(ball_list *l)
 
 
 
-int sum_of_odd_digits(int n) {
 
-	int r, sum = 0;
+int sum_of_digits(int nombre ) {
 
-	// reading each digit of n
-	while (n > 0) {
+uint8_t g[3][3];
+    int i;
+    from_base3_to_grid(g,nombre); 
+    uint64_t sommex=0,sommey=0;
+    for(i=0;i<3;i++)
+    {
+        sommex=sommex+g[i][i]+g[i][2-i];
+        sommey=sommey+g[1][i]+g[i][1];
+    }
+       return sommex*100+sommey;
 
-		r = n % 10;	// storing rightmost digit of n in r
-		n = n / 10;	// removing rightmost digit of n
-
-		// if r is odd, add r to sum
-		if (r % 2 == 0)
-			sum = sum + r;
-
-	}
-
-	return sum;
 }
-int sum_of_digits(int n) {
 
-	int m, sum = 0;
-
-
-    while(n>0)    
-    {    
-        m=n%10;    
-        sum=sum+m;    
-        n=n/10;    
-    } 
-	return sum;
-}
 
 
 
@@ -199,25 +179,30 @@ matchbox *new_matchbox(uint64_t  configuration, uint32_t g[3][3])
     {
         assert(0);
     }
-    m->match_box_id = sum_of_odd_digits(configuration);
-
-
 
     m->configurations[0] = configuration;
 
-    uint8_t grid[3][3] =  {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+    uint8_t grid[3][3];
+  from_base3_to_grid(grid, configuration);
 
-    uint64_t tmp = 0;
+    appliquer_transformation_base(grid,ROT_90);
+    m->configurations[1] =  from_grid_to_base3(grid);
 
-    for (uint8_t i = 1; i < 7; i++)
-    {
-       from_base3_to_grid(grid, configuration);
-       appliquer_transformation_base(grid, i);
-       tmp = from_grid_to_base3(grid);
+    appliquer_transformation_base(grid,ROT_90);
+    m->configurations[2] =  from_grid_to_base3(grid);
+    appliquer_transformation_base(grid,ROT_90);
+    m->configurations[3] =  from_grid_to_base3(grid);
+    appliquer_transformation_base(grid,ROT_90);
+    appliquer_transformation_base(grid,MIROIR_VERT);
+   m->configurations[4] =  from_grid_to_base3(grid);
+    appliquer_transformation_base(grid,ROT_90);
+   m->configurations[5] =  from_grid_to_base3(grid);
+    appliquer_transformation_base(grid,ROT_90);
+   m->configurations[6] =  from_grid_to_base3(grid);
+    appliquer_transformation_base(grid,ROT_90);
+   m->configurations[8] =  from_grid_to_base3(grid);
 
-      m->configurations[i] = tmp;
-
-    }
+  
 
     m->arl   = new_arraylist(9);
     _balls ball = 0;
@@ -317,3 +302,4 @@ void init_matchbox_hash_table(char * matchbox, hash_table *th, uint32_t size) {
 
     }
 }
+

@@ -44,11 +44,8 @@ typedef struct {
 
 typedef struct _matchbox  {
 
-    uint32_t match_box_id; // sum nombre pair
-    uint64_t configurations[7];  
-
+    uint64_t configurations[8];  
     //  tableau arrayList
-
     ball_arraylist  *arl;
 
     struct _matchbox *next;
