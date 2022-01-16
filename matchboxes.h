@@ -44,7 +44,7 @@ typedef struct {
 
 typedef struct _matchbox  {
 
-    uint64_t configurations[8];  
+    uint64_t configurations[8] ;  
     //  tableau arrayList
     ball_arraylist  *arl;
 
@@ -88,5 +88,9 @@ ball* rem_tete_maillon(ball_list *l);
  hash_table* new_hash_table(uint32_t size);
  void add_head(matchboxes_list *l , uint32_t configuration, uint32_t g[3][3]);
 void init_matchbox_hash_table(char * matchbox, hash_table *th, uint32_t size);
+void free_menace(hash_table *menace);
+_balls get_menace_move(hash_table* menace, uint64_t configuration);
+void save_menace_state(char * menace_state_file, hash_table *menace, uint32_t size);
+void count_ball(matchbox *m, uint32_t ball_arr[3][3]);
 
 #endif
