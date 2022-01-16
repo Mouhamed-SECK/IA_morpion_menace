@@ -1,11 +1,8 @@
 // les fonction manupilant les botes d'allumettes 
 
 #include "matchboxes.h"
+#include <string.h>
 #include "assert.h"
-
-
-
-
 
 tab_maillon* new_tab_maillon(uint32_t size)
 {
@@ -13,7 +10,7 @@ tab_maillon* new_tab_maillon(uint32_t size)
 
     //On construit le tab_maillon
     tab_maillon *t = malloc(sizeof(tab_maillon));
-
+    assert(t!=NULL);
 
     //Et on construit le tableau de maillons associes au tab_maillon
     t->balls_array = malloc(size *sizeof(ball));
@@ -24,7 +21,7 @@ tab_maillon* new_tab_maillon(uint32_t size)
     {
         t->balls_array[i].next = &(t->balls_array[i+1]);
     }
-    // t->balls_array[ size-1] = NULL;
+     t->balls_array[ size-1] .next = NULL;
 
     t->taille_tab = size;
     return t;
@@ -38,6 +35,16 @@ void add_tete_maillon (list_tab_maillon* l,  tab_maillon *t) {
     t->next = l->head;
     l->head = t;
     l->size += 1;
+}
+
+tab_maillon* remove_arraylist_head (list_tab_maillon* l) {
+
+    // assert((tab_maillon!=NULL));
+
+  tab_maillon  *t = l->head;
+    l->head = l->head->next;
+    l->size -= 1;
+    return t;
 }
 
  void agrandir_liste_libre(ball_arraylist *arl, uint32_t size)
@@ -85,7 +92,6 @@ list_tab_maillon *new_liste_tab_maillons()
     return r;
  }
 
-
 ball_arraylist* new_arraylist(uint32_t init_size)
  {
     ball_arraylist *arl;
@@ -127,6 +133,14 @@ ball* rem_tete_maillon(ball_list *l)
 
 }
 
+void  remove_matchbox(matchboxes_list *l)
+{
+    matchbox  *t = l->head;
+    l->head = l->head->next;
+    l->taille -= 1;
+   free(t);
+
+}
 
  void add_on_head_of_arrayList(ball_arraylist* arl, _balls d)
 {
@@ -149,42 +163,88 @@ ball* rem_tete_maillon(ball_list *l)
 
 }
 
+_Bool is_empty_arraylist_ltm (list_tab_maillon * l) {
+    return l->size == 0;
+}  
 
 
+void free_arraylist(ball_arraylist *arl)
+ {
+    tab_maillon *t;
+    while( ! is_empty_arraylist_ltm( arl->ltm ) )
+    {
+        t  = remove_arraylist_head( arl->ltm );
+        free(t->balls_array);
+        free(t);
+    }
 
-int sum_of_odd_digits(int n) {
+    free(arl->empty);
+    free(arl->occupied);
+    free(arl->ltm);
 
-	int r, sum = 0;
-
-	// reading each digit of n
-	while (n > 0) {
-
-		r = n % 10;	// storing rightmost digit of n in r
-		n = n / 10;	// removing rightmost digit of n
-
-		// if r is odd, add r to sum
-		if (r % 2 == 0)
-			sum = sum + r;
-
-	}
-
-	return sum;
-}
-int sum_of_digits(int n) {
-
-	int m, sum = 0;
+    free(arl);
 
 
-    while(n>0)    
-    {    
-        m=n%10;    
-        sum=sum+m;    
-        n=n/10;    
-    } 
-	return sum;
 }
 
+_Bool is_empty_matchboxes_list(matchboxes_list * l){
+    return l->taille == 0;
 
+} 
+
+void free_menace(hash_table* menace ){
+   
+  for (int i = 0; i <= 7; i++)
+    {
+        matchbox  *m = menace->tab[i]->head;
+        matchboxes_list *l = menace->tab[i];
+        
+
+        while ( m != NULL)
+        { 
+            matchbox *tmp = m;
+            tmp = m;
+            free_arraylist(m->arl);
+            
+            m = m->next;
+
+            free(tmp->configurations);
+        }
+
+   
+        while (is_empty_matchboxes_list(l))
+        { 
+          remove_matchbox(l);
+          
+        }
+        free(l);
+      
+       
+    }
+    
+    free(menace->tab);
+free(menace);
+         
+}
+   
+
+
+
+
+int sum_of_digits(int nombre ) {
+
+    uint8_t g[3][3];
+    int i;
+    from_base3_to_grid(g,nombre); 
+    uint64_t sommex=0,sommey=0;
+    for(i=0;i<3;i++)
+    {
+        sommex=sommex+g[i][i]+g[i][2-i];
+        sommey=sommey+g[1][i]+g[i][1];
+    }
+       return sommex*100+sommey;
+
+}
 
 uint32_t compute_hash_value(uint64_t configuration, uint32_t size) {
      return  sum_of_digits(configuration) % size; 
@@ -195,29 +255,46 @@ matchbox *new_matchbox(uint64_t  configuration, uint32_t g[3][3])
 {
     matchbox *m = malloc(sizeof(matchbox));
 
+   // m->configurations = malloc(8 *sizeof(uint64_t));
+
     if(m==NULL)
     {
         assert(0);
     }
-    m->match_box_id = sum_of_odd_digits(configuration);
 
-
-
+ 
     m->configurations[0] = configuration;
 
-    uint8_t grid[3][3] =  {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+    uint8_t grid[3][3];
+  from_base3_to_grid(grid, configuration);
 
-    uint64_t tmp = 0;
+    appliquer_transformation_base(grid,ROT_90);
+    m->configurations[1] =  from_grid_to_base3(grid);
 
-    for (uint8_t i = 1; i < 7; i++)
-    {
-       from_base3_to_grid(grid, configuration);
-       appliquer_transformation_base(grid, i);
-       tmp = from_grid_to_base3(grid);
+    appliquer_transformation_base(grid,ROT_90);
+    m->configurations[2] =  from_grid_to_base3(grid);
 
-      m->configurations[i] = tmp;
+    appliquer_transformation_base(grid,ROT_90);
+    m->configurations[3] =  from_grid_to_base3(grid);
 
-    }
+    appliquer_transformation_base(grid,ROT_90);
+    appliquer_transformation_base(grid,MIROIR_VERT);
+   m->configurations[4] =  from_grid_to_base3(grid);
+
+    appliquer_transformation_base(grid,ROT_90);
+   m->configurations[5] =  from_grid_to_base3(grid);
+
+    appliquer_transformation_base(grid,ROT_90);
+   m->configurations[6] =  from_grid_to_base3(grid);
+
+    appliquer_transformation_base(grid,ROT_90);
+   m->configurations[7] =  from_grid_to_base3(grid);
+
+     appliquer_transformation_base(grid, ROT_90);
+    appliquer_transformation_base(grid, MIROIR_VERT);
+    m->configurations[8] =  from_grid_to_base3(grid);
+
+  
 
     m->arl   = new_arraylist(9);
     _balls ball = 0;
@@ -270,7 +347,7 @@ hash_table* new_hash_table(uint32_t size)
 
     matchbox_hash_table->tab = malloc(size*sizeof(matchboxes_list*));    
     assert(matchbox_hash_table->tab != NULL);
-
+    matchbox_hash_table->taille =size;
     for( i=0; i<size; i=i+1 )
     {
 
@@ -316,4 +393,99 @@ void init_matchbox_hash_table(char * matchbox, hash_table *th, uint32_t size) {
         add_head((th->tab[index]) , configuration,  ball_arr);
 
     }
+
+  fclose(f);
+}
+
+void count_ball(matchbox *m, uint32_t ball_arr[3][3]) {
+
+
+
+    ball *b =m->arl->occupied->head;
+
+    while (b != NULL)
+    {
+        uint32_t i = b->ball_value/3;
+        uint32_t j = b->ball_value%3;
+
+        ball_arr[i][j]++;
+        b =b->next;
+    }
+}
+
+void save_menace_state(char * menace_state_file, hash_table *menace, uint32_t size) {
+
+    FILE *f = fopen(menace_state_file, "w");
+    
+
+    if (f== NULL) {
+        fprintf(stderr, "ERREUR : fichier introuvable");
+        assert(0);
+    }
+
+    uint32_t ball_arr[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+    uint32_t configuration = 0;
+
+    
+    for (uint32_t i = 0; i < size; i++)
+    {
+       matchbox *m = menace->tab[i]->head;
+
+        while (m !=NULL)
+        {
+           count_ball(m, ball_arr);
+            configuration = m->configurations[0];
+           fprintf(f, "%09d %d %d %d %d %d %d %d %d %d\n", configuration, ball_arr[0][0], ball_arr[0][1], ball_arr[0][2], ball_arr[1][0], ball_arr[1][1], ball_arr[1][2], ball_arr[2][0], ball_arr[2][1] , ball_arr[2][2]);
+        
+            // on remet le tableau a zero
+            memset(ball_arr, 0, sizeof(ball_arr)); 
+            m = m->next;
+        }
+        
+    }
+    
+    fclose(f);
+}
+
+
+_Bool is_configuration_in_array(uint64_t* configurations , uint64_t c, transformation *tr){
+
+ for (uint32_t j = 0; j < 8; j++)
+        {
+         
+          if (configurations[j] == c) {
+              *(tr) = j;
+              return 1;
+          }
+        }
+    return 0;
+} 
+
+_balls get_menace_move(hash_table* menace, uint64_t configuration) {
+
+    uint32_t index = compute_hash_value(configuration, 8);
+    matchbox *m = menace->tab[index]->head;
+    uint32_t list_size = menace->tab[index]->taille;
+    transformation tr = 0;
+
+    // on cherche la boite d'allumette 
+    for (uint32_t i = 0; i < list_size; i++)
+    {
+        if (is_configuration_in_array(m->configurations, configuration, &tr)){
+            break;
+        } 
+        m = m->next;
+    }
+
+    //on tire une bille au hazard
+    uint32_t ball_number = m->arl->occupied->size;
+    uint32_t menace_move = rand() % ball_number;
+    ball* b =  m->arl->occupied->head;
+    for (uint32_t i = 0; i < menace_move; i++)
+    {
+        b = b->next;
+    }
+
+    printf("%d", b->ball_value);
+    return transform_balls(tr, b->ball_value, 1); 
 }

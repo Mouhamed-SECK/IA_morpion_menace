@@ -281,3 +281,26 @@ uint8_t next_configuration(uint8_t grille[3][3])
     return CONTINUE;
 }
 
+void make_board(char* board)
+{
+    system("cls");
+    printf("\n\n\tTic Tac Toe\n\n");
+
+    printf("Player 1 (X)  -  Player 2 (O)\n\n\n");
+
+
+    printf("     |     |     \n");
+    printf("  %c  |  %c  |  %c \n", board[1], board[2], board[3]);
+
+    printf("_____|_____|_____\n");
+    printf("     |     |     \n");
+
+    printf("  %c  |  %c  |  %c \n", board[4], board[5], board[6]);
+
+    printf("_____|_____|_____\n");
+    printf("     |     |     \n");
+
+    printf("  %c  |  %c  |  %c \n", board[7], board[8], board[9]);
+
+    printf("     |     |     \n\n");
+}
