@@ -9,57 +9,32 @@
 
 
 
-
-
-
 int main() {    
-    // uint8_t board_state[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
 
+    
+    int x,i=0;
+    int res;
     hash_table *th = new_hash_table(HASH_TABLE_SIZE);
-
+    
     srand(time(NULL));
-
     init_matchbox_hash_table("matchbox.txt", th, HASH_TABLE_SIZE);
 
-    uint32_t move = get_menace_move(th, 000000000);
+   
+    printf("CHOISISSEZ :\n 1-MENACE JOUE SEULE   2-JOUER CONTRE MENACE   0-QUITTER \n ");
+    scanf("%d",&x);
+    
+    
+    if(x==2){
+        gamer_vs_menace(th);
+        save_menace_state("matchbox1.txt", th, HASH_TABLE_SIZE);
+    
 
-
-    switch (move)
+        free_menace(th);
+    }else if(x==1)
     {
-    case 0:
-        printf("PINK \n");
-        break;
-    case 2:
-        printf("RED \n");
-        break;
-    case 3:
-        printf("AMBER \n");
-        break;
-    case 4:
-        printf("GREEN \n");
-        break;
-    case 5:
-        printf("GOLD \n");
-        break;
-    case 6:
-        printf("BLACK \n");
-        break;
-    case 7:
-        printf("SILVER \n");
-        break;
-    case 8:
-        printf("LILAC \n");
-        break;
-
-    case 9:
-        printf("WHITE \n");
-        break;
-    default:
-        break;
+        menace_vs_menace(th,4);
     }
-
-    save_menace_state("matchbox1.txt", th, HASH_TABLE_SIZE);
-
-   free_menace(th);
+    
+    
  
 }

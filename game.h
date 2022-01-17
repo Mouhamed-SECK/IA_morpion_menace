@@ -8,8 +8,8 @@
 #include <stdbool.h>
 
 typedef enum _balls{PINK, RED, AMBER, GREEN, GOLD, BLACK, SILVER, LILAC, WHITE} _balls;
-typedef enum transformation{ID, ROT_90, ROT_180, ROT_270, MIROIR_VERT, MIROIR_HORIZ} transformation;
-
+typedef enum transformation{ID, ROT_90, ROT_180, ROT_270, MIROIR_VERT,RV_90,RV_180,RV_270,MIROIR_HORIZ} transformation;
+typedef enum game_result {LOST , WIN , DRAW} game_result;
 
 
 
@@ -26,9 +26,9 @@ _balls from_base3_to_ball(uint64_t nb);
 _balls transform_balls(transformation tr,_balls bille,int choix);
 char print_value(uint8_t value);
 void appliquer_transformation_base(uint8_t grille[3][3], transformation t);
-void print_grille_2d(uint8_t grille[3][3], FILE *f);
+void print_grille_2d(uint8_t grille[3][3]);
 void print_grille_1d(uint8_t grille[3][3], FILE *f);
 uint8_t next_configuration(uint8_t grille[3][3]);
-void make_board(char* board);
+void make_board(uint8_t board[3][3]);
 
 #endif

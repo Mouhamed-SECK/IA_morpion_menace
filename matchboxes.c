@@ -28,7 +28,7 @@ tab_maillon* new_tab_maillon(uint32_t size)
 }
 
 
-void add_tete_maillon (list_tab_maillon* l,  tab_maillon *t) {
+void add_head_maillon (list_tab_maillon* l,  tab_maillon *t) {
 
     // assert((tab_maillon!=NULL));
 
@@ -57,7 +57,7 @@ tab_maillon* remove_arraylist_head (list_tab_maillon* l) {
     t = new_tab_maillon(size);
 
     //Et on l'ajoute a la liste contenant tous nos tableaux
-    add_tete_maillon(arl->ltm, t); //La fonction d'ajout en tete d'une liste de
+    add_head_maillon(arl->ltm, t); //La fonction d'ajout en head d'une liste de
 
 
     //Enfin, on ajoute les maillons "manuellement" a la liste des maillons libres
@@ -124,7 +124,7 @@ void  add_on_head_of_occupied (ball_list* l,  ball *t) {
 }
 
 
-ball* rem_tete_maillon(ball_list *l)
+ball* rem_head_maillon(ball_list *l)
 {
     ball  *t = l->head;
     l->head = l->head->next;
@@ -142,6 +142,7 @@ void  remove_matchbox(matchboxes_list *l)
 
 }
 
+
  void add_on_head_of_arrayList(ball_arraylist* arl, _balls d)
 {
     ball *l;
@@ -154,7 +155,7 @@ void  remove_matchbox(matchboxes_list *l)
     }
 
     //On recupere un maillon libre
-    l = rem_tete_maillon( arl->empty );
+    l = rem_head_maillon( arl->empty );
 
     //On y stocke la donnee
     l->ball_value = d;
@@ -185,6 +186,31 @@ void free_arraylist(ball_arraylist *arl)
     free(arl);
 
 
+}
+void rem_ball(ball_arraylist* arl,_balls ball_value){
+    ball * head_of_occupied = arl->occupied->head;
+    ball * tmp;
+    if(head_of_occupied->ball_value == ball_value)
+    {
+        
+        add_on_head_of_occupied(arl->empty,rem_head_maillon(arl->occupied));
+    }
+    else{
+        
+        while(head_of_occupied != NULL){
+            if(head_of_occupied->ball_value == ball_value)
+            {   
+                
+                tmp=head_of_occupied->next->next;
+                head_of_occupied->next=tmp->next;
+                add_on_head_of_occupied(arl->empty,tmp);
+            }
+            head_of_occupied = head_of_occupied->next;
+        }
+        
+        
+    }
+    
 }
 
 _Bool is_empty_matchboxes_list(matchboxes_list * l){
@@ -367,6 +393,50 @@ void add_head(matchboxes_list *l , uint32_t configuration, uint32_t g[3][3])
     l->taille += 1;
 }
 
+opened_matchbox *new_maillon(ball_arraylist * barray,_balls ball_value)
+{
+    opened_matchbox *m = malloc(sizeof(opened_matchbox));
+    if(m==NULL)
+    {
+        assert(0);
+    }
+    m->barray=barray;
+    m->ball_value=ball_value;
+    return m;
+}
+
+opened_matchboxes_stack * omb_stack_new()
+{
+    opened_matchboxes_stack *r = malloc(sizeof(opened_matchboxes_stack));
+    if(r==NULL)
+    {
+    assert(0); 
+    }
+    r->head = NULL;
+    return r;
+}
+void omb_stack_push(opened_matchboxes_stack *p,ball_arraylist * barray,_balls ball_value){
+    opened_matchbox *m = new_maillon(barray,ball_value);
+    m->next = p->head;
+    p->head = m;  
+}
+
+void omb_stack_pop(opened_matchboxes_stack *p){
+    opened_matchbox *t = p->head;
+    p->head = p->head->next;
+    free(t);
+
+}
+
+void omb_stack_free(opened_matchboxes_stack *p){
+    while( p->head != NULL )
+    {
+        omb_stack_pop(p);
+    }
+
+    free(p);
+}
+
 void init_matchbox_hash_table(char * matchbox, hash_table *th, uint32_t size) {
 
 
@@ -461,7 +531,7 @@ _Bool is_configuration_in_array(uint64_t* configurations , uint64_t c, transform
     return 0;
 } 
 
-_balls get_menace_move(hash_table* menace, uint64_t configuration) {
+_balls get_menace_move(hash_table* menace, uint64_t configuration,opened_matchboxes_stack * ombs) {
 
     uint32_t index = compute_hash_value(configuration, 8);
     matchbox *m = menace->tab[index]->head;
@@ -479,13 +549,173 @@ _balls get_menace_move(hash_table* menace, uint64_t configuration) {
 
     //on tire une bille au hazard
     uint32_t ball_number = m->arl->occupied->size;
+    printf("%d\n",ball_number);
     uint32_t menace_move = rand() % ball_number;
     ball* b =  m->arl->occupied->head;
     for (uint32_t i = 0; i < menace_move; i++)
     {
         b = b->next;
     }
-
-    printf("%d", b->ball_value);
+    omb_stack_push(ombs,m->arl,b->ball_value);
+    //printf("%d", b->ball_value);
     return transform_balls(tr, b->ball_value, 1); 
+}
+
+void update_menace_state(game_result gr , opened_matchboxes_stack * ombs){
+    
+    opened_matchbox * tmp =ombs->head;
+        while( tmp != NULL )
+        {
+            switch (gr)
+            {
+            case 0:
+                rem_ball(tmp->barray,tmp->ball_value);
+                
+                printf("ici\n");
+                break;
+            case 1:
+                
+                add_on_head_of_arrayList(tmp->barray,tmp->ball_value);
+                add_on_head_of_arrayList(tmp->barray,tmp->ball_value);
+                add_on_head_of_arrayList(tmp->barray,tmp->ball_value);
+                break;
+            case 2:
+                add_on_head_of_arrayList(tmp->barray,tmp->ball_value);
+                break;
+            default:
+                break;
+            }
+            tmp=tmp->next;
+        }
+    
+}
+
+void gamer_vs_menace(hash_table *th)
+{
+    opened_matchboxes_stack * ombs = omb_stack_new();
+    uint8_t board_state[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+    
+    uint32_t move,choice;
+    int i,res;
+    for(i =0 ;i<4;i++){
+        
+        
+        move = get_menace_move(th, from_grid_to_base3(board_state),ombs);
+       
+        board_state[move / 3][move % 3]=1;
+        make_board(board_state);
+
+        if(is_win(board_state))
+        {
+            printf("MENACE WON !\n");
+            res=1;
+            break;
+        }
+
+        printf("choisissez une position entre 0 et 8\n");
+        scanf("%d",&choice);
+        board_state[choice / 3][choice % 3]=2;
+        make_board(board_state);
+
+        if(is_win(board_state))
+        {
+            printf("CONGRATULATIONS YOU WON !\n");
+            res=0;
+            break;
+        }
+
+    
+    }
+    
+    if(!is_win(board_state)){
+        for  (i = 0; i < 3; i++)
+        {
+            for(int j =0;j< 3 ;j++)
+            {
+                if(board_state[i][j]==0)
+                    board_state[i][j]=1;
+            } 
+        }   
+
+        if(is_win(board_state))
+        {
+            printf("MENACE WON !\n");
+            res=1;
+        }
+        else
+        {
+            printf("DRAW !\n");
+            res=2;
+        }
+    }
+    update_menace_state(res,ombs);
+    
+}
+
+void menace_vs_menace(hash_table *th,int N)
+{
+    for(int k=0;k<N;k++)
+    {
+        init_matchbox_hash_table("matchbox1.txt", th, HASH_TABLE_SIZE);
+        opened_matchboxes_stack * ombs1 = omb_stack_new();
+        opened_matchboxes_stack * ombs2 = omb_stack_new();
+        uint8_t board_state[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+        
+        uint32_t move,choice;
+        int i,res;
+        for(i =0 ;i<4;i++){
+        
+        
+            move = get_menace_move(th, from_grid_to_base3(board_state),ombs1);
+       
+            board_state[move / 3][move % 3]=1;
+            make_board(board_state);
+            printf("ici\n");
+            if(is_win(board_state))
+            {
+                res=1;
+                break;
+            }
+
+        
+            move = get_menace_move(th, from_grid_to_base3(board_state),ombs2);
+       
+            board_state[move / 3][move % 3]=1;
+            make_board(board_state);
+
+            if(is_win(board_state))
+            {
+                res=0;
+                break;
+            }
+
+    
+        }
+    
+        if(!is_win(board_state)){
+            for  (i = 0; i < 3; i++)
+            {
+                for(int j =0;j< 3 ;j++)
+                {
+                    if(board_state[i][j]==0)
+                        board_state[i][j]=1;
+                } 
+            }   
+
+            if(is_win(board_state))
+            {
+                printf("MENACE WON !\n");
+                res=1;
+            }
+            else
+            {
+                printf("DRAW !\n");
+                res=2;
+            }
+        }
+        
+    update_menace_state(res,ombs1);
+    save_menace_state("matchbox1.txt", th, HASH_TABLE_SIZE);
+    free_menace(th);
+    }
 }

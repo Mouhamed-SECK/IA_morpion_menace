@@ -57,6 +57,20 @@ void appliquer_transformation_base(uint8_t grille[3][3], transformation tr)
             grille[2][0] = grille[2][2];
             grille[2][2] = t;
             break;
+        case(RV_90):
+            appliquer_transformation_base(grille, MIROIR_VERT);
+            appliquer_transformation_base(grille, ROT_90);
+            break;
+
+        case(RV_180):
+            appliquer_transformation_base(grille, MIROIR_VERT);
+            appliquer_transformation_base(grille, ROT_180);
+            break;
+
+        case(RV_270):
+            appliquer_transformation_base(grille, MIROIR_VERT);
+            appliquer_transformation_base(grille, ROT_270);
+            break;
 
         case(MIROIR_HORIZ):
             appliquer_transformation_base(grille, ROT_90);
@@ -205,11 +219,13 @@ char print_value(uint8_t value)
 }
 
 
-void print_grille_2d(uint8_t grille[3][3], FILE *f)
+void print_grille_2d(uint8_t grille[3][3])
 {
-    fprintf(f, "|%c|%c|%c|\n", print_value(grille[0][0]), print_value(grille[0][1]), print_value(grille[0][2]));
-    fprintf(f, "|%c|%c|%c|\n", print_value(grille[1][0]), print_value(grille[1][1]), print_value(grille[1][2]));
-    fprintf(f, "|%c|%c|%c|\n", print_value(grille[2][0]), print_value(grille[2][1]), print_value(grille[2][2]));
+    printf( "|%c|%c|%c|\n", print_value(grille[0][0]), print_value(grille[0][1]), print_value(grille[0][2]));
+    printf( "|%c|%c|%c|\n", print_value(grille[1][0]), print_value(grille[1][1]), print_value(grille[1][2]));
+    printf( "|%c|%c|%c|\n", print_value(grille[2][0]), print_value(grille[2][1]), print_value(grille[2][2]));
+    printf("\n");
+
 }
 
 void print_grille_1d(uint8_t grille[3][3], FILE *f)
@@ -281,26 +297,26 @@ uint8_t next_configuration(uint8_t grille[3][3])
     return CONTINUE;
 }
 
-void make_board(char* board)
+void make_board(uint8_t board[3][3])
 {
-    system("cls");
+    system("clear");
     printf("\n\n\tTic Tac Toe\n\n");
 
     printf("Player 1 (X)  -  Player 2 (O)\n\n\n");
 
 
     printf("     |     |     \n");
-    printf("  %c  |  %c  |  %c \n", board[1], board[2], board[3]);
+    printf("  %c  |  %c  |  %c \n", print_value(board[0][0]), print_value(board[0][1]), print_value(board[0][2]));
 
     printf("_____|_____|_____\n");
     printf("     |     |     \n");
 
-    printf("  %c  |  %c  |  %c \n", board[4], board[5], board[6]);
+    printf("  %c  |  %c  |  %c \n",  print_value(board[1][0]), print_value(board[1][1]), print_value(board[1][2]));
 
     printf("_____|_____|_____\n");
     printf("     |     |     \n");
 
-    printf("  %c  |  %c  |  %c \n", board[7], board[8], board[9]);
+    printf("  %c  |  %c  |  %c \n", print_value(board[2][0]), print_value(board[2][1]), print_value(board[2][2]));
 
     printf("     |     |     \n\n");
 }

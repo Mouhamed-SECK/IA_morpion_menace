@@ -8,6 +8,8 @@
 #include <stdbool.h>
 #include "game.h"
 
+#define HASH_TABLE_SIZE 8
+
 typedef struct _ball
 {
     struct _ball *next;
@@ -66,6 +68,18 @@ typedef struct {
 } hash_table;
 
 
+typedef struct _opened_matchbox {
+
+    ball_arraylist * barray;
+    _balls ball_value;
+    struct _opened_matchbox * next;
+
+}opened_matchbox;
+
+typedef struct {
+    opened_matchbox * head;
+
+}opened_matchboxes_stack;
 
 
 tab_maillon* new_tab_maillon(uint32_t size);
@@ -77,20 +91,26 @@ list_tab_maillon *new_liste_tab_maillons();
 
 ball_arraylist* new_arraylist(uint32_t init_size);
 _Bool est_vide(ball_list *l );
-ball* rem_tete_maillon(ball_list *l);
 void  add_on_head_of_occupied (ball_list* l,  ball *t);
-
-ball* rem_tete_maillon(ball_list *l);
- void add_on_head_of_arrayList(ball_arraylist* arl, _balls d);
+ball* rem_head_maillon(ball_list *l);
+void add_on_head_of_arrayList(ball_arraylist* arl, _balls d);
+void rem_ball(ball_arraylist* arl,_balls ball_value);
  uint32_t compute_hash_value(uint64_t configuration,  uint32_t size);
  int sum_of_digits(int n);
  matchboxes_list *new_list();
  hash_table* new_hash_table(uint32_t size);
  void add_head(matchboxes_list *l , uint32_t configuration, uint32_t g[3][3]);
 void init_matchbox_hash_table(char * matchbox, hash_table *th, uint32_t size);
+opened_matchbox *new_maillon(ball_arraylist * barray,_balls ball_value);
+opened_matchboxes_stack * omb_stack_new();
+void omb_stack_push(opened_matchboxes_stack *p,ball_arraylist * barray, _balls ball_value);
+void omb_stack_pop(opened_matchboxes_stack *p);
+void omb_stack_free(opened_matchboxes_stack *p);
 void free_menace(hash_table *menace);
-_balls get_menace_move(hash_table* menace, uint64_t configuration);
+_balls get_menace_move(hash_table* menace, uint64_t configuration,opened_matchboxes_stack * ombs);
 void save_menace_state(char * menace_state_file, hash_table *menace, uint32_t size);
 void count_ball(matchbox *m, uint32_t ball_arr[3][3]);
-
+void update_menace_state(game_result gr , opened_matchboxes_stack * ombs);
+void gamer_vs_menace( hash_table *th);
+void menace_vs_menace(hash_table *th,int N);
 #endif
