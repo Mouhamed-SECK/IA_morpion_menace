@@ -208,8 +208,6 @@ void rem_ball(ball_arraylist* arl,_balls ball_value){
         m = r->next;
         r->next = m->next;
         arl->occupied->size -=1;
-        arl->empty->size +=1;
-
         add_on_head_of_occupied(arl->empty,m);
         return; 
     }

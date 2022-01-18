@@ -9,53 +9,77 @@
 
 void display_menu() {
 
-        system("cls");
-    	printf("\t\t\t\t  ***********************  \n");
-		printf("\t\t\t\t||     WELCOME TO THE    ||\n");
-		printf("\t\t\t\t||       MENACE IA       ||\n");
-		printf("\t\t\t\t  ***********************  \n");
+        //system("clear");
+    	printf("\t\t\t  ***********************  \n");
+		printf("\t\t\t||     WELCOME TO THE    ||\n");
+		printf("\t\t\t||       MENACE IA       ||\n");
+		printf("\t\t\t  ***********************  \n");
         printf("\n");
         printf("\n");
-		printf("\t\t\t\t=======TIC TAC TOE========\n");
-		printf("\t\t\t\t===========================\n");
+		printf("\t\t\t=======TIC TAC TOE========\n");
+		printf("\t\t\t===========================\n");
 
         printf("\n");
-		printf("\t\t\t\t\tMAIN MENU: \n\n");
-		printf("\t\t\t\t1--> MENACE VS GAMER\n\n");
-		printf("\t\t\t\t2--> MENACE VS RANDOM\n\n");
-		printf("\t\t\t\t3--> RESET MENACE SYSTEM\n\n");
-		printf("\t\t\t\t4--> Quit\n[");
+		printf("\t\t\t\tMAIN MENU: \n\n");
+		printf("\t\t\t1--> MENACE VS GAMER\n\n");
+		printf("\t\t\t2--> MENACE VS RANDOM\n\n");
+		printf("\t\t\t3--> RESET MENACE SYSTEM\n\n");
+		printf("\t\t\t4--> Quit\n[");
 
-        printf("\t\t\t\tMake your choice  : _\n");
+        printf("\t\t\tMake your choice  : _\n");
 	
 
 }
 
 
 int main() {    
-    int choice = 0;
+    uint32_t N,choice = 0;
     game_result result = 0;
 
     hash_table *menace = new_hash_table(HASH_TABLE_SIZE);
     opened_matchboxes_stack * opened_matchboxes = omb_stack_new();
-
-    uint8_t board_state[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
     
-   
     srand(time(NULL));
-    init_matchbox_hash_table("matchbox.txt", menace, HASH_TABLE_SIZE);
+    
 
     display_menu();
     scanf("%d",&choice);
-   
-    if(choice==1){
-        gamer_vs_menace(menace, board_state, opened_matchboxes, &result);  
+
+    while(choice !=4)
+    {   
+        init_matchbox_hash_table("matchbox.txt", menace, HASH_TABLE_SIZE);
+        uint8_t board_state[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+        switch (choice)
+        {
+        case 1:
+            
+            result = gamer_vs_menace(menace, board_state, opened_matchboxes);  
+            update_menace_state(result,opened_matchboxes);
+            save_menace_state("matchbox.txt", menace, HASH_TABLE_SIZE);
+            break;
+        case 2:
+            printf("CHOOSE A NUMBER\n");
+            scanf("%d",&N);
+            for(uint32_t i=0;i<N;i++)
+            {
+                uint8_t board_state[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+                result = menace_vs_random(menace, board_state, opened_matchboxes);
+                update_menace_state(result,opened_matchboxes);
+                save_menace_state("matchbox.txt", menace, HASH_TABLE_SIZE);
+            }
+            break;
+        case 3:
+            system("cp reset.txt matchbox.txt");
+            break;
+        default:
+            break;
+        }
+       
+        display_menu();
+        scanf("%d",&choice);
+
     }
-
-    update_menace_state(result,opened_matchboxes);
-
-
-    save_menace_state("matchbox.txt", menace, HASH_TABLE_SIZE);
+    omb_stack_free(opened_matchboxes);
     free_menace(menace);
     
 }

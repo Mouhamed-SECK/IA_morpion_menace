@@ -69,5 +69,5 @@ void add_on_head_of_arrayList(ball_arraylist* arl, _balls d);
 
 ball  *find_ball_predecessor( ball_list * l, uint32_t size, _balls ball_value);
 void rem_ball(ball_arraylist* arl,_balls ball_value);
-
+void free_arraylist(ball_arraylist *arl);
 #endif

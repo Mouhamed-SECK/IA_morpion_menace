@@ -210,9 +210,9 @@ char print_value(uint8_t value)
         case (0):
             return ' ';
         case (1):
-            return 'x';
-        case (2):
             return 'o';
+        case (2):
+            return 'x';
         default:
             assert(0);
     }
@@ -257,22 +257,44 @@ uint8_t next_configuration(uint8_t grille[3][3])
 
 void make_board(uint8_t board[3][3])
 {
-    system("cls");
+    char board_char[9];
+    int k=0;
+    system("clear");
     printf("\n\n\tTic Tac Toe\n\n");
 
     printf("Player 1 (X)  -  Player 2 (O)\n\n\n");
+    for(int i=0;i<3;i++)
+    {
+        for(int j=0;j<3;j++)
+        {
+            switch (board[i][j])
+            {
+            case 0:
+                board_char[k]=k+1;
+                break;
+            case 1:
+                board_char[k]='o';
+                break;
+            case 2:
+                board_char[k]='x';
+                break;
+            default:
+                break;
+            }
+            k++;
+        }
+    }
 
-
-    printf("     |     |     \n");
+    printf("1    |2    |3    \n");
     printf("  %c  |  %c  |  %c \n", print_value(board[0][0]), print_value(board[0][1]), print_value(board[0][2]));
 
     printf("_____|_____|_____\n");
-    printf("     |     |     \n");
+    printf("4    |5    |6    \n");
 
     printf("  %c  |  %c  |  %c \n",  print_value(board[1][0]), print_value(board[1][1]), print_value(board[1][2]));
 
     printf("_____|_____|_____\n");
-    printf("     |     |     \n");
+    printf("7    |8    |9    \n");
 
     printf("  %c  |  %c  |  %c \n", print_value(board[2][0]), print_value(board[2][1]), print_value(board[2][2]));
 

@@ -6,7 +6,9 @@
 
 #include "matchboxes.h"
 #include <string.h>
+#include <time.h>
 #include "assert.h"
+
 
 
 
@@ -74,16 +76,8 @@ uint32_t compute_hash_value(uint64_t configuration, uint32_t size) {
      return  sum_of_digits(configuration) % size; 
 }
 
-
-matchbox *new_matchbox(uint64_t  configuration, uint32_t g[3][3])
+void init_configuration(uint64_t  configuration,matchbox *m)
 {
-    matchbox *m = malloc(sizeof(matchbox));
-
-    if(m==NULL)
-    {
-        assert(0);
-    }
-
     m->configurations[0] = configuration;
 
     uint8_t grid[3][3];
@@ -111,10 +105,19 @@ matchbox *new_matchbox(uint64_t  configuration, uint32_t g[3][3])
     appliquer_transformation_base(grid,ROT_90);
    m->configurations[7] =  from_grid_to_base3(grid);
 
-     appliquer_transformation_base(grid, ROT_90);
-    appliquer_transformation_base(grid, MIROIR_VERT);
-    m->configurations[8] =  from_grid_to_base3(grid);
+}
 
+matchbox *new_matchbox(uint64_t  configuration, uint32_t g[3][3])
+{
+    matchbox *m = malloc(sizeof(matchbox));
+
+    if(m==NULL)
+    {
+        assert(0);
+    }
+
+    
+    init_configuration(configuration,m);
   
 
     m->arl   = new_arraylist(9);
@@ -228,7 +231,7 @@ void count_ball(matchbox *m, uint32_t ball_arr[3][3]) {
 
 void save_menace_state(char * menace_state_file, hash_table *menace, uint32_t size) {
 
-    FILE *f = fopen(menace_state_file, "rb");
+    FILE *f = fopen(menace_state_file, "w");
     
 
     if (f== NULL) {
@@ -312,7 +315,6 @@ void update_menace_state(game_result gr , opened_matchboxes_stack * ombs){
             {
             case 0:
                 rem_ball(tmp->barray,tmp->ball_value);
-                printf("ici\n");
                 break;
             case 1:
                 add_on_head_of_arrayList(tmp->barray,tmp->ball_value);
@@ -328,7 +330,7 @@ void update_menace_state(game_result gr , opened_matchboxes_stack * ombs){
             tmp=tmp->next;
         }
 
-        omb_stack_free(ombs);
+    
     
 }
 
@@ -338,43 +340,44 @@ void make_last_move(uint8_t board_state[3][3]) {
             for(int j =0;j< 3 ;j++)
             {
                 if(board_state[i][j]==0)
-                    board_state[i][j]=1;
+                    board_state[i][j]=2;
             } 
         }   
 }
 
 
 
-void gamer_vs_menace(hash_table *th, uint8_t board_state[3][3] , opened_matchboxes_stack * opened_matchbox, game_result  *result)
+game_result gamer_vs_menace(hash_table *th, uint8_t board_state[3][3] , opened_matchboxes_stack * opened_matchbox)
 {
-    uint32_t move = 0 , choice =0;
-
+    uint32_t box, move = 0 ,choice =0;
 
     for(uint32_t i =0 ;i<4;i++){
-        
         move = get_menace_move(th, from_grid_to_base3(board_state),opened_matchbox);
-        board_state[move / 3][move % 3]=1;
+        clock_t end_prog = clock();
+        board_state[move / 3][move % 3]=2;
         make_board(board_state);
 
         if(is_win(board_state))
         {
             printf("MENACE WON !\n");
-            *result=1;
-            break;
+            return 1;
         }
+        
+        do{
+            printf("CHOOSE A VALABLE CASE \n");
+            scanf("%d",&choice);
 
-        printf("choisissez une position entre 0 et 8\n");
-        scanf("%d",&choice);
-
-        board_state[choice / 3][choice % 3]=2;
+        }while((choice>9) || (choice<1) || (board_state[(choice-1) / 3][(choice-1) % 3]!=0) );
+            
+        board_state[(choice-1) / 3][(choice-1) % 3]=1;
         make_board(board_state);
 
         if(is_win(board_state))
         {
             printf("CONGRATULATIONS YOU WON !\n");
-            *result=0;
-            break;
+            return 0;
         }
+          
     
     }
     
@@ -384,13 +387,59 @@ void gamer_vs_menace(hash_table *th, uint8_t board_state[3][3] , opened_matchbox
         if(is_win(board_state))
         {
             printf("MENACE WON !\n");
-            *result=1;
+            return 1;
         }
         else
         {
             printf("DRAW !\n");
-            *result=2;
+            return 2;
         }
     }
    
+}
+game_result menace_vs_random(hash_table *th, uint8_t board_state[3][3] , opened_matchboxes_stack * opened_matchbox)
+{
+    uint32_t box, move = 0 ,choice =0;
+
+    for(uint32_t i =0 ;i<4;i++){
+        move = get_menace_move(th, from_grid_to_base3(board_state),opened_matchbox);
+        clock_t end_prog = clock();
+        board_state[move / 3][move % 3]=2;
+        make_board(board_state);
+
+        if(is_win(board_state))
+        {
+            printf("MENACE WON !\n");
+            return 1;
+        }
+        
+        
+        do
+        {
+            box=rand()%8;
+
+        }while(board_state[box /3][box % 3]!=0);
+        board_state[box /3][box % 3]=1;
+        if(is_win(board_state))
+        {
+            printf("RANDOM WON !\n");
+            return 0;
+        }
+
+    }  
+    
+    if(!is_win(board_state)){
+        make_last_move(board_state);
+
+        if(is_win(board_state))
+        {
+            printf("MENACE WON !\n");
+            return 1;
+        }
+        else
+        {
+            printf("DRAW !\n");
+            return 2;
+        }
+    }
 }

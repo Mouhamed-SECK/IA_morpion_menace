@@ -12,7 +12,6 @@ typedef enum transformation{ID, ROT_90, ROT_180, ROT_270, MIROIR_VERT,RV_90,RV_1
 typedef enum game_result {LOST , WIN , DRAW} game_result;
 
 
-
 _Bool has_empty_cases(uint8_t grille[3][3]);
 _Bool is_win(uint8_t grille[3][3]);
 _Bool is_valid_configuration(uint8_t grille[3][3]);

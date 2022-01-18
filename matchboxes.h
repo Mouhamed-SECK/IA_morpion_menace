@@ -44,7 +44,7 @@ matchboxes_list *new_list();
 hash_table* new_hash_table(uint32_t size);
 void add_head(matchboxes_list *l , uint32_t configuration, uint32_t g[3][3]);
 void init_matchbox_hash_table(char * matchbox, hash_table *th, uint32_t size);
-
+void init_configuration(uint64_t  configuration,matchbox *m);
 
 
 void free_menace(hash_table *menace);
@@ -52,5 +52,6 @@ _balls get_menace_move(hash_table* menace, uint64_t configuration,opened_matchbo
 void save_menace_state(char * menace_state_file, hash_table *menace, uint32_t size);
 void count_ball(matchbox *m, uint32_t ball_arr[3][3]);
 void update_menace_state(game_result gr , opened_matchboxes_stack * ombs);
-void gamer_vs_menace( hash_table *th, uint8_t board_state[3][3] , opened_matchboxes_stack * ombs, game_result  *result);
+game_result gamer_vs_menace( hash_table *th, uint8_t board_state[3][3] , opened_matchboxes_stack * opened_matchbox);
+game_result menace_vs_random(hash_table *th, uint8_t board_state[3][3] , opened_matchboxes_stack * opened_matchbox);
 #endif
