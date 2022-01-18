@@ -31,4 +31,5 @@ void print_grille_1d(uint8_t grille[3][3], FILE *f);
 uint8_t next_configuration(uint8_t grille[3][3]);
 void make_board(uint8_t board[3][3]);
 
+
 #endif

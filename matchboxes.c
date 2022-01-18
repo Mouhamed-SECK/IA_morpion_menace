@@ -1,137 +1,14 @@
-// les fonction manupilant les botes d'allumettes 
+/*
+*Ce fichier permet de gerer une boite d'allumete et la table de hachage de toutes les boites d'allumetes
+*elle contient toutes les fonctiond de mmanupulation d'une arraylist 
+*Ajout suppression Mise à jour et libération
+*/
 
 #include "matchboxes.h"
 #include <string.h>
 #include "assert.h"
 
-tab_maillon* new_tab_maillon(uint32_t size)
-{
-    uint32_t i;
 
-    //On construit le tab_maillon
-    tab_maillon *t = malloc(sizeof(tab_maillon));
-    assert(t!=NULL);
-
-    //Et on construit le tableau de maillons associes au tab_maillon
-    t->balls_array = malloc(size *sizeof(ball));
-    assert(t->balls_array != NULL);
-
-    //Et on lie les maillons du tableau entre eux
-    for( i=0; i<size-1; i=i+1 )
-    {
-        t->balls_array[i].next = &(t->balls_array[i+1]);
-    }
-     t->balls_array[ size-1] .next = NULL;
-
-    t->taille_tab = size;
-    return t;
-}
-
-
-void add_head_maillon (list_tab_maillon* l,  tab_maillon *t) {
-
-    // assert((tab_maillon!=NULL));
-
-    t->next = l->head;
-    l->head = t;
-    l->size += 1;
-}
-
-tab_maillon* remove_arraylist_head (list_tab_maillon* l) {
-
-    // assert((tab_maillon!=NULL));
-
-  tab_maillon  *t = l->head;
-    l->head = l->head->next;
-    l->size -= 1;
-    return t;
-}
-
- void agrandir_liste_libre(ball_arraylist *arl, uint32_t size)
- {
-    tab_maillon *t;
-
-    // assert( est_vide(arl->empty) );
-
-    //On construit un tableau de maillons
-    t = new_tab_maillon(size);
-
-    //Et on l'ajoute a la liste contenant tous nos tableaux
-    add_head_maillon(arl->ltm, t); //La fonction d'ajout en head d'une liste de
-
-
-    //Enfin, on ajoute les maillons "manuellement" a la liste des maillons libres
-    arl->empty->head = &( t->balls_array[0] );
-    arl->empty->size = t->taille_tab;
-
- }
-
-ball_list *new_liste()
- {
-    ball_list *r = malloc(sizeof(ball_list));
-    if(r==NULL)
-    {
-    assert(0);
-    }
-    r->size=0;
-    r->head = NULL;
-    
-    return r;
- }
-
-list_tab_maillon *new_liste_tab_maillons()
-{
-    list_tab_maillon *r = malloc(sizeof(list_tab_maillon));
-    if(r==NULL)
-    {
-    assert(0);
-    }
-    r->size=0;
-    r->head = NULL;
-    
-    return r;
- }
-
-ball_arraylist* new_arraylist(uint32_t init_size)
- {
-    ball_arraylist *arl;
-
-    //On construit l'arraylist
-    arl = malloc(sizeof(ball_arraylist));
-    assert(arl != NULL);
-
-    //On construit un tableau de maillons
-    arl->empty = new_liste();
-    arl->occupied = new_liste();
-    arl->ltm = new_liste_tab_maillons();
-
-    //On cree des maillons libres
-    agrandir_liste_libre(arl, init_size);
-
-    return arl;
- }
-
-_Bool est_vide(ball_list *l ) {
-    return l->head == 0;
-}
-
- 
-
-void  add_on_head_of_occupied (ball_list* l,  ball *t) {
-    t->next = l->head;
-    l->head = t;
-    l->size += 1;
-}
-
-
-ball* rem_head_maillon(ball_list *l)
-{
-    ball  *t = l->head;
-    l->head = l->head->next;
-    l->size -= 1;
-    return t;
-
-}
 
 void  remove_matchbox(matchboxes_list *l)
 {
@@ -140,77 +17,6 @@ void  remove_matchbox(matchboxes_list *l)
     l->taille -= 1;
    free(t);
 
-}
-
-
- void add_on_head_of_arrayList(ball_arraylist* arl, _balls d)
-{
-    ball *l;
-
-    //On agrandit la liste des maillons libres si elle est vide...
-    if( est_vide(arl->empty) )
-
-    {
-        agrandir_liste_libre(arl, 1.5*arl->occupied->size); //Ici, le coefficient 1.5
-    }
-
-    //On recupere un maillon libre
-    l = rem_head_maillon( arl->empty );
-
-    //On y stocke la donnee
-    l->ball_value = d;
-    //Et on place le maillon dans la liste des occupes
-    add_on_head_of_occupied(arl->occupied, l);
-
-}
-
-_Bool is_empty_arraylist_ltm (list_tab_maillon * l) {
-    return l->size == 0;
-}  
-
-
-void free_arraylist(ball_arraylist *arl)
- {
-    tab_maillon *t;
-    while( ! is_empty_arraylist_ltm( arl->ltm ) )
-    {
-        t  = remove_arraylist_head( arl->ltm );
-        free(t->balls_array);
-        free(t);
-    }
-
-    free(arl->empty);
-    free(arl->occupied);
-    free(arl->ltm);
-
-    free(arl);
-
-
-}
-void rem_ball(ball_arraylist* arl,_balls ball_value){
-    ball * head_of_occupied = arl->occupied->head;
-    ball * tmp;
-    if(head_of_occupied->ball_value == ball_value)
-    {
-        
-        add_on_head_of_occupied(arl->empty,rem_head_maillon(arl->occupied));
-    }
-    else{
-        
-        while(head_of_occupied != NULL){
-            if(head_of_occupied->ball_value == ball_value)
-            {   
-                
-                tmp=head_of_occupied->next->next;
-                head_of_occupied->next=tmp->next;
-                add_on_head_of_occupied(arl->empty,tmp);
-            }
-            head_of_occupied = head_of_occupied->next;
-        }
-        
-        
-    }
-    
 }
 
 _Bool is_empty_matchboxes_list(matchboxes_list * l){
@@ -225,7 +31,6 @@ void free_menace(hash_table* menace ){
         matchbox  *m = menace->tab[i]->head;
         matchboxes_list *l = menace->tab[i];
         
-
         while ( m != NULL)
         { 
             matchbox *tmp = m;
@@ -237,26 +42,19 @@ void free_menace(hash_table* menace ){
             free(tmp->configurations);
         }
 
-   
         while (is_empty_matchboxes_list(l))
         { 
           remove_matchbox(l);
           
         }
         free(l);
-      
-       
     }
     
     free(menace->tab);
-free(menace);
+    free(menace);
          
 }
    
-
-
-
-
 int sum_of_digits(int nombre ) {
 
     uint8_t g[3][3];
@@ -281,18 +79,15 @@ matchbox *new_matchbox(uint64_t  configuration, uint32_t g[3][3])
 {
     matchbox *m = malloc(sizeof(matchbox));
 
-   // m->configurations = malloc(8 *sizeof(uint64_t));
-
     if(m==NULL)
     {
         assert(0);
     }
 
- 
     m->configurations[0] = configuration;
 
     uint8_t grid[3][3];
-  from_base3_to_grid(grid, configuration);
+    from_base3_to_grid(grid, configuration);
 
     appliquer_transformation_base(grid,ROT_90);
     m->configurations[1] =  from_grid_to_base3(grid);
@@ -393,53 +188,8 @@ void add_head(matchboxes_list *l , uint32_t configuration, uint32_t g[3][3])
     l->taille += 1;
 }
 
-opened_matchbox *new_maillon(ball_arraylist * barray,_balls ball_value)
-{
-    opened_matchbox *m = malloc(sizeof(opened_matchbox));
-    if(m==NULL)
-    {
-        assert(0);
-    }
-    m->barray=barray;
-    m->ball_value=ball_value;
-    return m;
-}
-
-opened_matchboxes_stack * omb_stack_new()
-{
-    opened_matchboxes_stack *r = malloc(sizeof(opened_matchboxes_stack));
-    if(r==NULL)
-    {
-    assert(0); 
-    }
-    r->head = NULL;
-    return r;
-}
-void omb_stack_push(opened_matchboxes_stack *p,ball_arraylist * barray,_balls ball_value){
-    opened_matchbox *m = new_maillon(barray,ball_value);
-    m->next = p->head;
-    p->head = m;  
-}
-
-void omb_stack_pop(opened_matchboxes_stack *p){
-    opened_matchbox *t = p->head;
-    p->head = p->head->next;
-    free(t);
-
-}
-
-void omb_stack_free(opened_matchboxes_stack *p){
-    while( p->head != NULL )
-    {
-        omb_stack_pop(p);
-    }
-
-    free(p);
-}
 
 void init_matchbox_hash_table(char * matchbox, hash_table *th, uint32_t size) {
-
-
 
     FILE *f = fopen(matchbox, "rb");
     
@@ -456,21 +206,14 @@ void init_matchbox_hash_table(char * matchbox, hash_table *th, uint32_t size) {
     while (fscanf(f, "%d %d %d %d %d %d %d %d %d %d\n", &configuration, &ball_arr[0][0], &ball_arr[0][1], &ball_arr[0][2], &ball_arr[1][0], &ball_arr[1][1], &ball_arr[1][2], &ball_arr[2][0], &ball_arr[2][1] , &ball_arr[2][2]) == 10)
     {
      
-
         uint32_t index = compute_hash_value(configuration, size);
-        // printf("CONFIGURATION %d \n", &configuration);
-       
         add_head((th->tab[index]) , configuration,  ball_arr);
-
     }
 
   fclose(f);
 }
 
 void count_ball(matchbox *m, uint32_t ball_arr[3][3]) {
-
-
-
     ball *b =m->arl->occupied->head;
 
     while (b != NULL)
@@ -485,7 +228,7 @@ void count_ball(matchbox *m, uint32_t ball_arr[3][3]) {
 
 void save_menace_state(char * menace_state_file, hash_table *menace, uint32_t size) {
 
-    FILE *f = fopen(menace_state_file, "w");
+    FILE *f = fopen(menace_state_file, "rb");
     
 
     if (f== NULL) {
@@ -557,24 +300,21 @@ _balls get_menace_move(hash_table* menace, uint64_t configuration,opened_matchbo
         b = b->next;
     }
     omb_stack_push(ombs,m->arl,b->ball_value);
-    //printf("%d", b->ball_value);
     return transform_balls(tr, b->ball_value, 1); 
 }
 
 void update_menace_state(game_result gr , opened_matchboxes_stack * ombs){
     
-    opened_matchbox * tmp =ombs->head;
+        opened_matchbox * tmp =ombs->head;
         while( tmp != NULL )
         {
             switch (gr)
             {
             case 0:
                 rem_ball(tmp->barray,tmp->ball_value);
-                
                 printf("ici\n");
                 break;
             case 1:
-                
                 add_on_head_of_arrayList(tmp->barray,tmp->ball_value);
                 add_on_head_of_arrayList(tmp->barray,tmp->ball_value);
                 add_on_head_of_arrayList(tmp->barray,tmp->ball_value);
@@ -587,48 +327,13 @@ void update_menace_state(game_result gr , opened_matchboxes_stack * ombs){
             }
             tmp=tmp->next;
         }
+
+        omb_stack_free(ombs);
     
 }
 
-void gamer_vs_menace(hash_table *th)
-{
-    opened_matchboxes_stack * ombs = omb_stack_new();
-    uint8_t board_state[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
-    
-    uint32_t move,choice;
-    int i,res;
-    for(i =0 ;i<4;i++){
-        
-        
-        move = get_menace_move(th, from_grid_to_base3(board_state),ombs);
-       
-        board_state[move / 3][move % 3]=1;
-        make_board(board_state);
-
-        if(is_win(board_state))
-        {
-            printf("MENACE WON !\n");
-            res=1;
-            break;
-        }
-
-        printf("choisissez une position entre 0 et 8\n");
-        scanf("%d",&choice);
-        board_state[choice / 3][choice % 3]=2;
-        make_board(board_state);
-
-        if(is_win(board_state))
-        {
-            printf("CONGRATULATIONS YOU WON !\n");
-            res=0;
-            break;
-        }
-
-    
-    }
-    
-    if(!is_win(board_state)){
-        for  (i = 0; i < 3; i++)
+void make_last_move(uint8_t board_state[3][3]) {
+      for  (uint32_t i = 0; i < 3; i++)
         {
             for(int j =0;j< 3 ;j++)
             {
@@ -636,86 +341,56 @@ void gamer_vs_menace(hash_table *th)
                     board_state[i][j]=1;
             } 
         }   
+}
+
+
+
+void gamer_vs_menace(hash_table *th, uint8_t board_state[3][3] , opened_matchboxes_stack * opened_matchbox, game_result  *result)
+{
+    uint32_t move = 0 , choice =0;
+
+
+    for(uint32_t i =0 ;i<4;i++){
+        
+        move = get_menace_move(th, from_grid_to_base3(board_state),opened_matchbox);
+        board_state[move / 3][move % 3]=1;
+        make_board(board_state);
 
         if(is_win(board_state))
         {
             printf("MENACE WON !\n");
-            res=1;
+            *result=1;
+            break;
+        }
+
+        printf("choisissez une position entre 0 et 8\n");
+        scanf("%d",&choice);
+
+        board_state[choice / 3][choice % 3]=2;
+        make_board(board_state);
+
+        if(is_win(board_state))
+        {
+            printf("CONGRATULATIONS YOU WON !\n");
+            *result=0;
+            break;
+        }
+    
+    }
+    
+    if(!is_win(board_state)){
+        make_last_move(board_state);
+
+        if(is_win(board_state))
+        {
+            printf("MENACE WON !\n");
+            *result=1;
         }
         else
         {
             printf("DRAW !\n");
-            res=2;
+            *result=2;
         }
     }
-    update_menace_state(res,ombs);
-    
-}
-
-void menace_vs_menace(hash_table *th,int N)
-{
-    for(int k=0;k<N;k++)
-    {
-        init_matchbox_hash_table("matchbox1.txt", th, HASH_TABLE_SIZE);
-        opened_matchboxes_stack * ombs1 = omb_stack_new();
-        opened_matchboxes_stack * ombs2 = omb_stack_new();
-        uint8_t board_state[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
-        
-        uint32_t move,choice;
-        int i,res;
-        for(i =0 ;i<4;i++){
-        
-        
-            move = get_menace_move(th, from_grid_to_base3(board_state),ombs1);
-       
-            board_state[move / 3][move % 3]=1;
-            make_board(board_state);
-            printf("ici\n");
-            if(is_win(board_state))
-            {
-                res=1;
-                break;
-            }
-
-        
-            move = get_menace_move(th, from_grid_to_base3(board_state),ombs2);
-       
-            board_state[move / 3][move % 3]=1;
-            make_board(board_state);
-
-            if(is_win(board_state))
-            {
-                res=0;
-                break;
-            }
-
-    
-        }
-    
-        if(!is_win(board_state)){
-            for  (i = 0; i < 3; i++)
-            {
-                for(int j =0;j< 3 ;j++)
-                {
-                    if(board_state[i][j]==0)
-                        board_state[i][j]=1;
-                } 
-            }   
-
-            if(is_win(board_state))
-            {
-                printf("MENACE WON !\n");
-                res=1;
-            }
-            else
-            {
-                printf("DRAW !\n");
-                res=2;
-            }
-        }
-        
-    update_menace_state(res,ombs1);
-    save_menace_state("matchbox1.txt", th, HASH_TABLE_SIZE);
-    free_menace(th);
-    }
+   
 }

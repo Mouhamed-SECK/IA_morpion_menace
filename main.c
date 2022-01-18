@@ -7,34 +7,55 @@
 
 #define HASH_TABLE_SIZE 8
 
+void display_menu() {
+
+        system("cls");
+    	printf("\t\t\t\t  ***********************  \n");
+		printf("\t\t\t\t||     WELCOME TO THE    ||\n");
+		printf("\t\t\t\t||       MENACE IA       ||\n");
+		printf("\t\t\t\t  ***********************  \n");
+        printf("\n");
+        printf("\n");
+		printf("\t\t\t\t=======TIC TAC TOE========\n");
+		printf("\t\t\t\t===========================\n");
+
+        printf("\n");
+		printf("\t\t\t\t\tMAIN MENU: \n\n");
+		printf("\t\t\t\t1--> MENACE VS GAMER\n\n");
+		printf("\t\t\t\t2--> MENACE VS RANDOM\n\n");
+		printf("\t\t\t\t3--> RESET MENACE SYSTEM\n\n");
+		printf("\t\t\t\t4--> Quit\n[");
+
+        printf("\t\t\t\tMake your choice  : _\n");
+	
+
+}
 
 
 int main() {    
+    int choice = 0;
+    game_result result = 0;
 
-    
-    int x,i=0;
-    int res;
-    hash_table *th = new_hash_table(HASH_TABLE_SIZE);
-    
-    srand(time(NULL));
-    init_matchbox_hash_table("matchbox.txt", th, HASH_TABLE_SIZE);
+    hash_table *menace = new_hash_table(HASH_TABLE_SIZE);
+    opened_matchboxes_stack * opened_matchboxes = omb_stack_new();
 
+    uint8_t board_state[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+    
    
-    printf("CHOISISSEZ :\n 1-MENACE JOUE SEULE   2-JOUER CONTRE MENACE   0-QUITTER \n ");
-    scanf("%d",&x);
-    
-    
-    if(x==2){
-        gamer_vs_menace(th);
-        save_menace_state("matchbox1.txt", th, HASH_TABLE_SIZE);
-    
+    srand(time(NULL));
+    init_matchbox_hash_table("matchbox.txt", menace, HASH_TABLE_SIZE);
 
-        free_menace(th);
-    }else if(x==1)
-    {
-        menace_vs_menace(th,4);
+    display_menu();
+    scanf("%d",&choice);
+   
+    if(choice==1){
+        gamer_vs_menace(menace, board_state, opened_matchboxes, &result);  
     }
+
+    update_menace_state(result,opened_matchboxes);
+
+
+    save_menace_state("matchbox.txt", menace, HASH_TABLE_SIZE);
+    free_menace(menace);
     
-    
- 
 }
