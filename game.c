@@ -64,7 +64,7 @@ void appliquer_transformation_base(uint8_t grille[3][3], transformation tr)
 
         case(RV_180):
             appliquer_transformation_base(grille, MIROIR_VERT);
-            appliquer_transformation_base(grille, ROT_180);
+        appliquer_transformation_base(grille, ROT_180);
             break;
 
         case(RV_270):
@@ -233,48 +233,6 @@ void print_grille_1d(uint8_t grille[3][3], FILE *f)
     fprintf(f, "%c%c%c%c%c%c%c%c%c", print_value(grille[0][0]), print_value(grille[0][1]), print_value(grille[0][2]), print_value(grille[1][0]), print_value(grille[1][1]), print_value(grille[1][2]), print_value(grille[2][0]), print_value(grille[2][1]), print_value(grille[2][2]));
 }
 
-void print_all_transformations_1d(uint8_t g[3][3], FILE *f)
-{
-    print_grille_1d(g,f);
-    fprintf(f, "|");
-    /*
-
-    appliquer_transformation_base(g, ROT_90);
-    print_grille_1d(g,f);
-    fprintf(f, "|");
-
-    appliquer_transformation_base(g, ROT_90);
-    print_grille_1d(g,f);
-    fprintf(f, "|");
-
-    appliquer_transformation_base(g, ROT_90);
-    print_grille_1d(g,f);
-    fprintf(f, "|");
-
-    appliquer_transformation_base(g, ROT_90);
-    appliquer_transformation_base(g, MIROIR_VERT);
-    print_grille_1d(g,f);
-    fprintf(f, "|");
-
-    appliquer_transformation_base(g, ROT_90);
-    print_grille_1d(g,f);
-    fprintf(f, "|");
-
-    appliquer_transformation_base(g, ROT_90);
-    print_grille_1d(g,f);
-    fprintf(f, "|");
-
-    appliquer_transformation_base(g, ROT_90);
-    print_grille_1d(g,f);
-
-    //On fait une derniere transformation pour remettre la grille dans son Ã©tat initial
-    appliquer_transformation_base(g, ROT_90);
-    appliquer_transformation_base(g, MIROIR_VERT);
-    */
-    fprintf(f, "\n");
-    
-}
-
 uint8_t next_configuration(uint8_t grille[3][3])
 {
     uint8_t i, j;
@@ -299,7 +257,7 @@ uint8_t next_configuration(uint8_t grille[3][3])
 
 void make_board(uint8_t board[3][3])
 {
-    system("clear");
+    system("cls");
     printf("\n\n\tTic Tac Toe\n\n");
 
     printf("Player 1 (X)  -  Player 2 (O)\n\n\n");
