@@ -231,7 +231,7 @@ void count_ball(matchbox *m, uint32_t ball_arr[3][3]) {
 
 void save_menace_state(char * menace_state_file, hash_table *menace, uint32_t size) {
 
-    FILE *f = fopen(menace_state_file, "w");
+    FILE *f = fopen(menace_state_file, "w+");
     
 
     if (f== NULL) {
@@ -257,6 +257,7 @@ void save_menace_state(char * menace_state_file, hash_table *menace, uint32_t si
             memset(ball_arr, 0, sizeof(ball_arr)); 
             m = m->next;
         }
+        printf("%d\n",menace->tab[i]->taille);
         
     }
     
@@ -314,7 +315,14 @@ void update_menace_state(game_result gr , opened_matchboxes_stack * ombs){
             switch (gr)
             {
             case 0:
-                rem_ball(tmp->barray,tmp->ball_value);
+                if(tmp->barray->occupied->size!=0)
+                {
+                    rem_ball(tmp->barray,tmp->ball_value);
+                }
+                else
+                {
+                    add_on_head_of_arrayList(tmp->barray,tmp->ball_value);
+                }
                 break;
             case 1:
                 add_on_head_of_arrayList(tmp->barray,tmp->ball_value);
@@ -347,20 +355,20 @@ void make_last_move(uint8_t board_state[3][3]) {
 
 
 
-game_result gamer_vs_menace(hash_table *th, uint8_t board_state[3][3] , opened_matchboxes_stack * opened_matchbox)
+void gamer_vs_menace(hash_table *th, uint8_t board_state[3][3] )
 {
-    uint32_t box, move = 0 ,choice =0;
-
+    uint32_t result=0, move = 0 ,choice =0;
+    opened_matchboxes_stack * opened_matchboxes = omb_stack_new();
     for(uint32_t i =0 ;i<4;i++){
-        move = get_menace_move(th, from_grid_to_base3(board_state),opened_matchbox);
-        clock_t end_prog = clock();
+        move = get_menace_move(th, from_grid_to_base3(board_state),opened_matchboxes);
         board_state[move / 3][move % 3]=2;
         make_board(board_state);
 
         if(is_win(board_state))
         {
             printf("MENACE WON !\n");
-            return 1;
+            result=1;
+            break;
         }
         
         do{
@@ -375,7 +383,8 @@ game_result gamer_vs_menace(hash_table *th, uint8_t board_state[3][3] , opened_m
         if(is_win(board_state))
         {
             printf("CONGRATULATIONS YOU WON !\n");
-            return 0;
+            result=0;
+            break;
         }
           
     
@@ -387,43 +396,48 @@ game_result gamer_vs_menace(hash_table *th, uint8_t board_state[3][3] , opened_m
         if(is_win(board_state))
         {
             printf("MENACE WON !\n");
-            return 1;
+            result=1;
         }
         else
         {
             printf("DRAW !\n");
-            return 2;
+            result=2;
         }
     }
+    update_menace_state(result,opened_matchboxes);
+    omb_stack_free(opened_matchboxes);
    
 }
-game_result menace_vs_random(hash_table *th, uint8_t board_state[3][3] , opened_matchboxes_stack * opened_matchbox)
+void menace_vs_random(hash_table *th, uint8_t board_state[3][3] )
 {
-    uint32_t box, move = 0 ,choice =0;
-
+    uint32_t box,result, move = 0 ;
+    opened_matchboxes_stack * opened_matchboxes = omb_stack_new();
     for(uint32_t i =0 ;i<4;i++){
-        move = get_menace_move(th, from_grid_to_base3(board_state),opened_matchbox);
-        clock_t end_prog = clock();
+
+        move = get_menace_move(th, from_grid_to_base3(board_state),opened_matchboxes);
         board_state[move / 3][move % 3]=2;
         make_board(board_state);
 
         if(is_win(board_state))
         {
             printf("MENACE WON !\n");
-            return 1;
+            result=1;
+            break;
         }
         
-        
+
         do
         {
-            box=rand()%8;
+            box=rand()%9;
 
         }while(board_state[box /3][box % 3]!=0);
+        
         board_state[box /3][box % 3]=1;
         if(is_win(board_state))
         {
             printf("RANDOM WON !\n");
-            return 0;
+            result=0;
+            break;
         }
 
     }  
@@ -434,12 +448,16 @@ game_result menace_vs_random(hash_table *th, uint8_t board_state[3][3] , opened_
         if(is_win(board_state))
         {
             printf("MENACE WON !\n");
-            return 1;
+            result=1;
+            
         }
         else
         {
             printf("DRAW !\n");
-            return 2;
+            result=2;
+        
         }
     }
+    update_menace_state(result,opened_matchboxes);
+    omb_stack_free(opened_matchboxes);
 }

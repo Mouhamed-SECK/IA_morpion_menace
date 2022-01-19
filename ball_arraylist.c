@@ -198,17 +198,23 @@ void rem_ball(ball_arraylist* arl,_balls ball_value){
     ball * r = NULL;
     if(m->ball_value == ball_value)
     {
-        
         add_on_head_of_occupied(arl->empty,rem_head_maillon(arl->occupied));
     }
     else{
         
-
         r = find_ball_predecessor(arl->occupied, arl->occupied->size, ball_value);
-        m = r->next;
-        r->next = m->next;
-        arl->occupied->size -=1;
-        add_on_head_of_occupied(arl->empty,m);
+        if(r->next!=NULL)
+        {
+            m = r->next;
+            r->next = m->next;
+            arl->occupied->size -=1;
+            if(arl->occupied->size == 0)
+            {
+                arl->occupied->head = NULL;
+            }
+       
+            add_on_head_of_occupied(arl->empty,m);
+        }
         return; 
     }
     

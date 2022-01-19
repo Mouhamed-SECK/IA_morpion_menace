@@ -184,7 +184,7 @@ uint64_t from_ball_to_base3(_balls bille,int choix)
 
 _balls from_base3_to_ball(uint64_t nb)
 {
-    uint32_t i;
+    uint32_t i=0;
     while(nb%10==0){
         nb=nb/10;
         i++;
@@ -254,36 +254,48 @@ uint8_t next_configuration(uint8_t grille[3][3])
 
     return CONTINUE;
 }
+void reset_menace(){
+    char ch;
 
+   FILE *source, *target;
+ 
+   source = fopen("reset.txt", "r");
+ 
+   if( source == NULL )
+   {
+      printf("Press any key to exit...\n");
+      exit(EXIT_FAILURE);
+   }
+ 
+   
+ 
+   target = fopen("matchbox.txt", "w+");
+ 
+   if( target == NULL )
+   {
+      fclose(source);
+      printf("Press any key to exit...\n");
+      exit(EXIT_FAILURE);
+   }
+ 
+   while( ( ch = fgetc(source) ) != EOF )
+      fputc(ch, target);
+ 
+   printf("MENACE is reset.\n");
+ 
+   fclose(source);
+   fclose(target);
+ 
+}
 void make_board(uint8_t board[3][3])
 {
-    char board_char[9];
-    int k=0;
+    
+    
     system("clear");
     printf("\n\n\tTic Tac Toe\n\n");
 
     printf("Player 1 (X)  -  Player 2 (O)\n\n\n");
-    for(int i=0;i<3;i++)
-    {
-        for(int j=0;j<3;j++)
-        {
-            switch (board[i][j])
-            {
-            case 0:
-                board_char[k]=k+1;
-                break;
-            case 1:
-                board_char[k]='o';
-                break;
-            case 2:
-                board_char[k]='x';
-                break;
-            default:
-                break;
-            }
-            k++;
-        }
-    }
+   
 
     printf("1    |2    |3    \n");
     printf("  %c  |  %c  |  %c \n", print_value(board[0][0]), print_value(board[0][1]), print_value(board[0][2]));

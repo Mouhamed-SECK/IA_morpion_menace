@@ -28,6 +28,7 @@ void appliquer_transformation_base(uint8_t grille[3][3], transformation t);
 void print_grille_2d(uint8_t grille[3][3]);
 void print_grille_1d(uint8_t grille[3][3], FILE *f);
 uint8_t next_configuration(uint8_t grille[3][3]);
+void reset_menace();
 void make_board(uint8_t board[3][3]);
 
 
